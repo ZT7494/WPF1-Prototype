@@ -1,37 +1,39 @@
 ﻿using ScottPlot;
 using System.Net.Http;
-using System.Text;
 using System.Windows;
-using System.Windows.Automation.Peers;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Drawing;
-using ScottPlot.Colormaps;
 using API_testing;
 using Newtonsoft.Json;
-using System.Windows.Media.TextFormatting;
-using System.Net;
-using System.Runtime.Intrinsics.Arm;
+using System.Windows.Controls.Primitives;
+using Colors = System.Windows.Media.Colors;
 
 namespace WPF1
-{
+{                  
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static HttpClient Client = new HttpClient() { BaseAddress = new Uri("https://api.openf1.org/v1/")};
+        
+        public static HttpClient Client = new HttpClient() { BaseAddress = new Uri("https://api.openf1.org/v1/")}; //The same instance of a HTTP client can be used across the program
+
         private Plotter Plotter = new Plotter();
+
+        Style SBStyle = new Style(typeof(ScrollBar));
+        Style LBStyle = new Style(typeof(ListBox));
+
+        
+
+        
+
+
+        //The main UI is a grid, which handles all resizing and spacing.
         private Grid grid = new Grid() {
             HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
             VerticalAlignment = System.Windows.VerticalAlignment.Stretch,
         };
+        
 
         public MainWindow()
         {
@@ -40,7 +42,7 @@ namespace WPF1
             //this.Width = 900; this.Height = 900;
             this.WindowState = WindowState.Maximized;
             this.Top = 20; this.Left = 20;
-            this.Background = new SolidColorBrush(System.Windows.Media.Colors.Black);
+            this.Background = new SolidColorBrush(Colors.Black);
 
             for (int i = 0; i < 5; i++)
             {
@@ -48,85 +50,42 @@ namespace WPF1
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
             this.Content = grid;
-
+            StyleSetup();
             Main();
+        }
+
+        private void StyleSetup()
+        {
+            
+            SBStyle.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Colors.DarkSlateGray)));
+            SBStyle.Setters.Add(new Setter(Control.ForegroundProperty, new SolidColorBrush(Colors.DarkRed)));
+            SBStyle.Setters.Add(new Setter(Control.BorderBrushProperty, new SolidColorBrush(Colors.Black)));
+
+            LBStyle.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Colors.Black)));
+            LBStyle.Setters.Add(new Setter(Control.ForegroundProperty, new SolidColorBrush(Colors.WhiteSmoke)));
+            LBStyle.Setters.Add(new Setter(Control.BorderBrushProperty, new SolidColorBrush(Colors.DarkSlateGray)));
+
+            Resources.Add(typeof(ScrollBar), SBStyle);
+            Resources.Add(typeof(ListBox), LBStyle);
         }
 
         private async void Main()
         {
-            await ListBoxTest();
+            DataPlot d = new(this, Plotter, grid, 0, 0, 2, 5);
         }
-
-        private void GridPlace( UIElement e, int c = 0, int r = 0, Grid g = null)
+        private void GridPlace( UIElement e, int c = 0, int r = 0, Grid g = null, int cs = 1, int rs = 1)
         {
             if (g == null) { g = this.grid; }
             Grid.SetRow(e, r); Grid.SetColumn(e, c);
+            Grid.SetRowSpan(e, rs); Grid.SetColumnSpan(e, cs);
             g.Children.Add(e);
         }
-        
-        private async Task ListBoxTest()
-        {
 
-            //try to make litbox for various items
-            var JSONData = await APICall("drivers?session_key=latest");
-            List<Driver> Drivers = JsonConvert.DeserializeObject<List<Driver>>(JSONData);
-            ListBox DriverLB = new ListBox() { 
-                SelectionMode = SelectionMode.Multiple,
-                ItemsSource = Drivers,
-                DisplayMemberPath = "full_name",
-            };
-            GridPlace(DriverLB);
-
-
-            List<string>stats = new List<string>() { "Brake", "Gears","RPM", "Speed", "Throttle (%)" };
-            ListBox StatLB = new()
-            {
-                SelectionMode = SelectionMode.Single,
-                ItemsSource = stats,
-            };
-            GridPlace(StatLB, 1, 0);
-            
-
-
-
-
-            Button b = new Button();
-            
-            b.Click += (s, e) => { 
-                
-            };
-
-            
-        }
-
-        
-        
-
-        async Task APItest()
-        {
-            var JSONData = await APICall("car_data?driver_number=81&session_key=latest&speed>310");
-            List<CarStats> stats = JsonConvert.DeserializeObject<List<CarStats>>(JSONData);
-            List<double> data = new();
-            foreach (CarStats cs in stats)
-            {
-                data.Add(cs.getAtts()[3]);
-            }
-            System.Windows.Controls.Image img = Plotter.Plot(data.ToArray(), Generate.ConsecutiveSeconds(5332, new DateTime(2025, 5, 4, 21, 00, 00)), sizeX: (int)this.ActualWidth, sizeY: (int)(this.ActualHeight * 0.4));
-
-            Grid.SetRow(img, 1);
-            Grid.SetColumn(img, 0);
-            Grid.SetRowSpan(img, 2);
-            Grid.SetColumnSpan(img, 5);
-            grid.Children.Add(img);
-        }
-
-        async Task<string> APICall(string relativePath)
+        public async Task<string> APICall(string relativePath)
         {
             var request = new HttpRequestMessage(new HttpMethod("GET"), relativePath);
             var response = await Client.SendAsync(request);
             return await response.Content.ReadAsStringAsync();
         }
-
-        
     }
 }
