@@ -18,7 +18,7 @@ namespace WPF1
         {
             Grid DV = new Grid()
             {
-                ShowGridLines = true,
+                //ShowGridLines = true,
                 Background = new SolidColorBrush(Colors.Black)
             };
             for (int i = 0; i < 5; i++) { DV.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); }
@@ -81,6 +81,30 @@ namespace WPF1
 
             var img = new System.Windows.Controls.Image() { Source = b };
             GridPlace(img, DV, 1, 0, 3, 3);
+
+            
+            Task t = ShowPastSessions(Parent, D, DV, MainColor);
+        }
+
+        private async Task ShowPastSessions(MainWindow Parent, Driver D, Grid DV, SolidColorBrush BG)
+        {
+            //sessions of type race from current year, then use the end time of the session to pull driver position?
+            ListBox Results = new() { Background = BG };
+            ScrollViewer.SetVerticalScrollBarVisibility(Results, ScrollBarVisibility.Hidden);
+            var JSONData = await Parent.APICall($"sessions?session_type=Race&year=2025");
+            List<Session> Sessions = JsonConvert.DeserializeObject<List<Session>>(JSONData);
+
+            List<string> DisplayData = new();
+            foreach(Session S in Sessions)
+            {
+                
+                var posJSON = await Parent.APICall($"position?session_key={S.session_key}&driver_number={D.driver_number}");
+                Position p = JsonConvert.DeserializeObject<List<Position>>(posJSON).FirstOrDefault();
+
+                DisplayData.Add($"{S.country_name}: P{p.position}");
+            }
+            Results.ItemsSource = DisplayData;
+            GridPlace(Results, DV, 1, 3, 3, 5);
         }
         private void GridPlace(UIElement e, Grid g, int row = 0, int col = 0, int rowspan = 1, int colspan = 1)
         {

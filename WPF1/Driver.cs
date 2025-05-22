@@ -68,4 +68,32 @@ namespace API_testing
         public required string meeting_official_name { get; set; }
         public required int year { get; set; }
     }
+
+    class Session
+    {
+        public required int circuit_key { get; set; }
+        public required string circuit_short_name { get; set; }
+        public required string country_code { get; set; }
+        public required int country_key { get; set; }
+        public required string country_name { get; set; }
+        public required DateTime date_end { get; set; }
+        public required DateTime date_start { get; set; }
+        public required TimeSpan gmt_offset { get; set; }
+        public required string location { get; set; }
+        public required int meeting_key { get; set; }
+        public required int session_key { get; set; }
+        public required string session_name { get; set; }
+        public required string session_type { get; set; }
+        public required int year { get; set; }
+    }
+
+    class Position
+    {
+        public required DateTime date { get; set; }
+        public required int driver_number { get; set; }
+        public required int meeting_key { get; set; }
+        public required int position { get; set; }
+        public required int session_key { get; set; }
+    }
+
 }
