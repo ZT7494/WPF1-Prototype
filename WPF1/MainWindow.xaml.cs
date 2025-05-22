@@ -20,24 +20,24 @@ namespace WPF1
 
         private Plotter Plotter = new Plotter();
 
+        public Meeting MainMeeting { get; set; }
+
+        
+
         Style SBStyle = new Style(typeof(ScrollBar));
         Style LBStyle = new Style(typeof(ListBox));
-
-        
-
-        
-
 
         //The main UI is a grid, which handles all resizing and spacing.
         private Grid grid = new Grid() {
             HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
             VerticalAlignment = System.Windows.VerticalAlignment.Stretch,
+            ShowGridLines = true,
         };
         
-
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
             //Main Window Setup:
             //this.Width = 900; this.Height = 900;
             this.WindowState = WindowState.Maximized;
@@ -50,8 +50,25 @@ namespace WPF1
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
             this.Content = grid;
+            
+            //Main();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Task t = meetingSetup();
             StyleSetup();
-            Main();
+            
+            DataPlot d = new(this, Plotter, grid, 0, 0, 2, 5);
+            DriverView v = new(this, grid);
+        }
+
+        private async Task meetingSetup()
+        {
+            var JSONData = await APICall($"meetings?meeting_key=latest");
+            Meeting m = JsonConvert.DeserializeObject<List<Meeting>>(JSONData).FirstOrDefault();
+            this.Title = $"Timing Sheet {m.meeting_name} {m.year}";
+            MainMeeting = m;
         }
 
         private void StyleSetup()
@@ -69,10 +86,7 @@ namespace WPF1
             Resources.Add(typeof(ListBox), LBStyle);
         }
 
-        private async void Main()
-        {
-            DataPlot d = new(this, Plotter, grid, 0, 0, 2, 5);
-        }
+
         private void GridPlace( UIElement e, int c = 0, int r = 0, Grid g = null, int cs = 1, int rs = 1)
         {
             if (g == null) { g = this.grid; }

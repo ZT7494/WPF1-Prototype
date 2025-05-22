@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace API_testing
 {
+    
     //this is just class definitions for the JSON packages returned by the OpenF1 API
     class Driver
     {
@@ -52,7 +53,7 @@ namespace API_testing
         }
     }
 
-    class Meeting
+    public class Meeting
     {
         public required int circuit_key { get; set; }
         public required string circuit_short_name { get; set; }

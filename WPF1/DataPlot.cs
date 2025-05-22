@@ -8,7 +8,8 @@ namespace WPF1
 {
     internal class DataPlot
     {
-        public DataPlot(MainWindow Parent, Plotter Plotter, Grid masterGrid, int x, int y, int rowspan, int colspan) {
+        public DataPlot(MainWindow Parent, Plotter Plotter, Grid masterGrid,
+            int x, int y, int rowspan, int colspan) {
             if (rowspan < 2 || colspan < 3) { MessageBox.Show("Not enough space to be placed"); return; }
 
             Grid subGrid = new Grid();
@@ -16,7 +17,16 @@ namespace WPF1
             for (int i = 0; i < colspan; i++) { subGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); }
 
             GridPlace(subGrid, masterGrid, x, y, colspan, rowspan);
+            
+            subGrid.Background = new SolidColorBrush(Colors.DarkSlateGray); 
 
+            Border b = new Border();
+            b.BorderThickness = new Thickness(3);
+            b.BorderBrush = new SolidColorBrush(Colors.DarkRed);
+
+            GridPlace(b, subGrid, x, y, colspan, rowspan);
+            
+            
             UIDisplay(Parent, subGrid, Plotter, rowspan, colspan);
         }
 
