@@ -36,12 +36,10 @@ namespace WPF1
         
         public MainWindow()
         {
+            //Constructor Method - Formats Window, Binds further methods to the Loaded Event
             InitializeComponent();
             Loaded += MainWindow_Loaded;
-            //Main Window Setup:
-            //this.Width = 900; this.Height = 900;
             this.WindowState = WindowState.Maximized;
-            this.Top = 20; this.Left = 20;
             this.Background = new SolidColorBrush(Colors.Black);
 
             for (int i = 0; i < 5; i++)
@@ -51,20 +49,25 @@ namespace WPF1
             }
             this.Content = grid;
             
-            //Main();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            //Called once window is loaded
+            //Calls in further setup, and then adds widgets (currently testing widgets)
             Task t = meetingSetup();
             StyleSetup();
             
             DataPlot d = new(this, Plotter, grid, 0, 0, 2, 5);
-            DriverView v = new(this, grid);
+            DriverView v = new(this, grid, 2, 0);
+            DriverView v2 = new(this, grid, 2, 1);
+
+            WeatherView w = new(this, grid, 2, 2);
         }
 
         private async Task meetingSetup()
         {
+            //pulls latest meeting data by default
             var JSONData = await APICall($"meetings?meeting_key=latest");
             Meeting m = JsonConvert.DeserializeObject<List<Meeting>>(JSONData).FirstOrDefault();
             this.Title = $"Timing Sheet {m.meeting_name} {m.year}";
@@ -89,6 +92,7 @@ namespace WPF1
 
         private void GridPlace( UIElement e, int c = 0, int r = 0, Grid g = null, int cs = 1, int rs = 1)
         {
+            //helper function to place elements on a grid
             if (g == null) { g = this.grid; }
             Grid.SetRow(e, r); Grid.SetColumn(e, c);
             Grid.SetRowSpan(e, rs); Grid.SetColumnSpan(e, cs);
@@ -97,6 +101,7 @@ namespace WPF1
 
         public async Task<string> APICall(string relativePath)
         {
+            //simplifies API calls to 2 lines
             var request = new HttpRequestMessage(new HttpMethod("GET"), relativePath);
             var response = await Client.SendAsync(request);
             return await response.Content.ReadAsStringAsync();

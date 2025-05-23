@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace API_testing
 {
     
-    //this is just class definitions for the JSON packages returned by the OpenF1 API
+    //class definitions for the JSON packages returned by the OpenF1 API
     class Driver
     {
         public required string broadcast_name { get; set; }
@@ -94,6 +94,20 @@ namespace API_testing
         public required int meeting_key { get; set; }
         public required int position { get; set; }
         public required int session_key { get; set; }
+    }
+
+    class Weather
+    {
+        public required double air_temperature { get; set; }
+        public required DateTime date { get; set; }
+        public required int humidity { get; set; }
+        public required int meeting_key { get; set; }
+        public required double pressure { get; set; }
+        public required int rainfall { get; set; }
+        public required int session_key { get; set; }
+        public required double track_temperature { get; set; }
+        public required int wind_direction { get; set; }
+        public required double wind_speed { get; set; }
     }
 
 }

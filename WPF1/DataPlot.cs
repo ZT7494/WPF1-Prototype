@@ -8,6 +8,7 @@ namespace WPF1
 {
     internal class DataPlot
     {
+        //Class for plotting data that can be returned by openF1
         public DataPlot(MainWindow Parent, Plotter Plotter, Grid masterGrid,
             int x, int y, int rowspan, int colspan) {
             if (rowspan < 2 || colspan < 3) { MessageBox.Show("Not enough space to be placed"); return; }
@@ -32,6 +33,7 @@ namespace WPF1
 
         private async Task UIDisplay(MainWindow Parent, Grid subGrid, Plotter Plotter, int imgX, int imgY)
         {
+            //Using listboxes, we let the user select the driver and the stat they want displayed
             var JSONData = await Parent.APICall("drivers?session_key=latest");
             List<Driver> Drivers = JsonConvert.DeserializeObject<List<Driver>>(JSONData);
             ListBox DriverLB = new ListBox()
@@ -52,20 +54,14 @@ namespace WPF1
 
             GridPlace(StatLB, subGrid, 1);
 
-
-            Button b = new Button()
-            {
-                Content = "Plot",
-            };
-            GridPlace(b, subGrid, 2);
-
-            b.Click += async (s, e) => {
+            //binding function so when the user selects a stat, it is Plotted. 
+            StatLB.SelectionChanged += async (s, e) => {
                 if (DriverLB.SelectedIndex == -1 || StatLB.SelectedIndex == -1) { MessageBox.Show("One or more items unselected"); return; }
                 int ind = StatLB.SelectedIndex;
                 List<DateTime> xs = new List<DateTime>();
                 List<double[]> ys = new();
 
-                
+                //Pass in Times of each DataPoint and the data to Plotter
                 foreach (Driver D in DriverLB.SelectedItems)
                 {
                     var JSONData = await Parent.APICall($"car_data?driver_number={D.driver_number}&session_key=latest");
@@ -78,8 +74,7 @@ namespace WPF1
                     }
                     ys.Add(tmp.ToArray());
                 }
-                //System.Windows.Controls.Image img = Plotter.Plot(null, xs.ToArray(), sizeX: (int)subGrid.RenderSize.Width, sizeY: (int)subGrid.RenderSize.Height, mys: ys);
-                MessageBox.Show("Plotter Initialized");
+                
                 ScottPlot.WPF.WpfPlot p = Plotter.WpfPlot(null, xs.ToArray(), ys);
                 GridPlace(p, subGrid, 0, 0, imgY, imgX);
             };

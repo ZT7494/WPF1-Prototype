@@ -14,8 +14,9 @@ namespace WPF1
 
     internal class DriverView
     { 
-        public DriverView(MainWindow Parent, Grid g)
+        public DriverView(MainWindow Parent, Grid g, int row, int col)
         {
+            //A sub-grid will control layout of smaller text and images in this widget
             Grid DV = new Grid()
             {
                 //ShowGridLines = true,
@@ -24,7 +25,7 @@ namespace WPF1
             for (int i = 0; i < 5; i++) { DV.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); }
             for (int i = 0; i < 8; i++) { DV.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); }
 
-            GridPlace(DV, g, 2, 0);
+            GridPlace(DV, g, row, col);
 
             Border b = new Border();
             b.BorderThickness = new Thickness(3);
@@ -56,6 +57,7 @@ namespace WPF1
 
         private void ShowData(MainWindow Parent, Grid DV, Driver D)
         {
+            //Function to display data from the Driver class
             System.Windows.Media.Color col = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#" + D.team_colour);
             SolidColorBrush MainColor = new SolidColorBrush(col);
             Thickness Default = new Thickness(2);
@@ -72,12 +74,11 @@ namespace WPF1
             Label TeamName = new() {Content = D.team_name, Background = MainColor, BorderBrush = Border, BorderThickness = Default, HorizontalContentAlignment = HorizontalAlignment.Center }; 
             GridPlace(TeamName, DV, 5, 3, 1, 5);
 
-            BitmapImage b = new();
+            BitmapImage b = new(); //Get image into a WPF image element 
             b.BeginInit();
             b.UriSource = new Uri(D.headshot_url, UriKind.Absolute);
             b.CacheOption = BitmapCacheOption.OnLoad;
             b.EndInit();
-            //b.Freeze();
 
             var img = new System.Windows.Controls.Image() { Source = b };
             GridPlace(img, DV, 1, 0, 3, 3);
@@ -88,7 +89,7 @@ namespace WPF1
 
         private async Task ShowPastSessions(MainWindow Parent, Driver D, Grid DV, SolidColorBrush BG)
         {
-            //sessions of type race from current year, then use the end time of the session to pull driver position?
+            //ListBox to display drivers recent results
             ListBox Results = new() { Background = BG };
             ScrollViewer.SetVerticalScrollBarVisibility(Results, ScrollBarVisibility.Hidden);
             var JSONData = await Parent.APICall($"sessions?session_type=Race&year=2025");
@@ -101,7 +102,7 @@ namespace WPF1
                 var posJSON = await Parent.APICall($"position?session_key={S.session_key}&driver_number={D.driver_number}");
                 Position p = JsonConvert.DeserializeObject<List<Position>>(posJSON).FirstOrDefault();
 
-                DisplayData.Add($"{S.country_name}: P{p.position}");
+                DisplayData.Add($"{S.country_name} {S.session_name}: P{p.position}");
             }
             Results.ItemsSource = DisplayData;
             GridPlace(Results, DV, 1, 3, 3, 5);
