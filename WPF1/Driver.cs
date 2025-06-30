@@ -100,7 +100,7 @@ namespace API_testing
     {
         public required double air_temperature { get; set; }
         public required DateTime date { get; set; }
-        public required int humidity { get; set; }
+        public required double humidity { get; set; }
         public required int meeting_key { get; set; }
         public required double pressure { get; set; }
         public required int rainfall { get; set; }

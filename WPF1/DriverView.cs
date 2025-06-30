@@ -79,7 +79,6 @@ namespace WPF1
             b.UriSource = new Uri(D.headshot_url, UriKind.Absolute);
             b.CacheOption = BitmapCacheOption.OnLoad;
             b.EndInit();
-
             var img = new System.Windows.Controls.Image() { Source = b };
             GridPlace(img, DV, 1, 0, 3, 3);
 
