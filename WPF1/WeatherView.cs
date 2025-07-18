@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace WPF1
 {
@@ -77,6 +78,14 @@ namespace WPF1
 
 
             //add Rain to grid using animated gifs
+            Uri gifUri;
+            if(W.rainfall == 1) { gifUri = new("Sprites\\rain.gif"); }
+            else { gifUri = new("Sprites\\sun.gif"); }
+            Image gif = new Image()
+            {
+                Source = new BitmapImage(gifUri)
+            };
+            GridPlace(gif, WV, 3, 6, 6, 3);
 
         }
 
